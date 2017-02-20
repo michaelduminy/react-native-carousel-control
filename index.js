@@ -21,7 +21,7 @@ export default class Carousel extends Component {
     static propTypes = {
         pageStyle: PropTypes.object,
         pageWidth: PropTypes.number,
-        children: PropTypes.oneOfType([ PropTypes.arrayOf(PropTypes.node), PropTypes.node ]).isRequired,
+        children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]).isRequired,
         initialPage: PropTypes.number,
         containerStyle: PropTypes.object,
         noItemsText: PropTypes.string,
@@ -67,11 +67,10 @@ export default class Carousel extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        
         this.setState({
             currentPage: nextProps.currentPage
         });
-        
+
         this._calculateGap(nextProps);
     }
 
@@ -152,7 +151,7 @@ export default class Carousel extends Component {
 
         */
         const gap = (width - (2 * sneak) - pageWidth) / 2;
-        this.setState({gap: gap});
+        this.setState({ gap: gap });
     }
 
     _handleScrollEnd(e) {
@@ -166,14 +165,21 @@ export default class Carousel extends Component {
 
         let newPage = currentPage;
 
-        if (currentPage + 1 < this._getPagesCount() && swipeThreshold < swiped) {
+        let pagesChanged = parseInt(swiped);
+        let swipedRemainder = swiped % 1;
+
+        newPage += pagesChanged;
+
+        if (swipedRemainder > swipeThreshold) {
             newPage++;
-        } else if (0 < currentPage && swiped < -swipeThreshold) {
+        } else if (swipedRemainder < -swipeThreshold) {
             newPage--;
         }
 
+        newPage = Math.max(Math.min(newPage, this._getPagesCount()), 0);
+
         if (newPage !== currentPage) {
-            this.setState({currentPage: newPage});
+            this.setState({ currentPage: newPage });
         } else {
             this._resetScrollPosition();
         }
@@ -208,9 +214,9 @@ export default class Carousel extends Component {
         if (!this.props.children) {
             body = (
                 <TouchableWithoutFeedback>
-                    <View style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }>
-                        <Text style={ styles.noItemsText }>
-                            { this.props.noItemsText }
+                    <View style={[styles.page, computedStyles.page, this.props.pageStyle]}>
+                        <Text style={styles.noItemsText}>
+                            {this.props.noItemsText}
                         </Text>
                     </View>
                 </TouchableWithoutFeedback>
@@ -221,13 +227,13 @@ export default class Carousel extends Component {
             body = children.map((c, index) => {
                 return (
                     <TouchableWithoutFeedback
-                        key={ index }
-                        onPress={ () => this.setState({currentPage: index}) }
+                        key={index}
+                        onPress={() => this.setState({ currentPage: index })}
                     >
                         <View
-                            style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }
+                            style={[styles.page, computedStyles.page, this.props.pageStyle]}
                         >
-                            { c }
+                            {c}
                         </View>
                     </TouchableWithoutFeedback>
                 );
@@ -235,18 +241,18 @@ export default class Carousel extends Component {
         }
 
         return (
-            <View style={[ styles.container, this.props.containerStyle ]}>
+            <View style={[styles.container, this.props.containerStyle]}>
                 <ScrollView
-                    automaticallyAdjustContentInsets={ false }
+                    automaticallyAdjustContentInsets={false}
                     bounces
-                    contentContainerStyle={ [ computedStyles.scrollView ] }
-                    decelerationRate={ 0.9 }
+                    contentContainerStyle={[computedStyles.scrollView]}
+                    decelerationRate={0.9}
                     horizontal
-                    onScrollEndDrag={ this._handleScrollEnd }
-                    ref={ c => this.scrollView = c }
-                    showsHorizontalScrollIndicator={ false }
+                    onMomentumScrollEnd={this._handleScrollEnd}
+                    ref={c => this.scrollView = c}
+                    showsHorizontalScrollIndicator={false}
                 >
-                    { body }
+                    {body}
                 </ScrollView>
             </View>
         );
